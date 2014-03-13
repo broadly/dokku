@@ -97,10 +97,12 @@ case "$1" in
     }
 
     # run checks first, then post-deploy hooks, which switches Nginx traffic
-    trap kill_new INT TERM EXIT
-    dokku_log_info1 "Running pre-flight checks"
-    pluginhook check-deploy  $APP $port $ipaddr $id
-    trap -        INT TERM EXIT
+    if [[ -z "$DOKKU_SKIP_CHECKS" ]] ; then
+      trap kill_new INT TERM EXIT
+      dokku_log_info1 "Running pre-flight checks"
+      pluginhook check-deploy  $APP $port $ipaddr $id
+      trap -        INT TERM EXIT
+    fi
 
     # now using the new container
     echo $id > "$DOKKU_ROOT/$APP/CONTAINER"
